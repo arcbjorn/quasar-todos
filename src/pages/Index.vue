@@ -1,14 +1,17 @@
 <template>
   <q-page padding>
-    <!-- <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component> -->
     <div class="row q-mb-lg">
-      <q-input class="col" v-model="text" placeholder="Add new task"/>
-      <q-btn color="primary" label="Add"/>
+      <q-input
+        class="col"
+        v-model="newTodo"
+        placeholder="Add new task"
+        @keyup.enter="addTodo"
+      />
+      <q-btn
+        color="primary"
+        label="Add"
+        @click.native="addTodo"
+      />
     </div>
 
     <div class="row">
@@ -17,19 +20,51 @@
           <q-toolbar class="bg-primary text-white shadow-2">
             <q-toolbar-title>Tasks</q-toolbar-title>
           </q-toolbar>
-          <q-item clickable v-ripple>
+          <q-item
+            clickable
+            v-ripple
+            v-for="todo in todos"
+            :key="todo.id"
+          >
             <q-item-section>
-              <q-item-label>Item with caption</q-item-label>
+              <q-item-label>{{ todo.content }}</q-item-label>
             </q-item-section>
             <q-item-section top side>
               <div class="text-grey-8 q-gutter-xs">
-                <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-                <q-btn class="gt-xs" size="12px" color="green" flat dense round icon="done" />
-                <q-btn size="12px" flat dense round icon="more_vert" />
+                <q-btn
+                  class="gt-xs"
+                  size="12px"
+                  color="green"
+                  flat dense round
+                  icon="done"
+                  @click.native="moveToDone(todo.id)"
+                />
               </div>
             </q-item-section>
           </q-item>
         </q-list>
+
+        <q-list class="q-mt-lg" bordered separator >
+          <q-toolbar class="bg-primary text-white shadow-2">
+            <q-toolbar-title>Done</q-toolbar-title>
+          </q-toolbar>
+          <q-item
+            clickable
+            v-ripple
+            v-for="todo in done"
+            :key="todo.id"
+          >
+            <q-item-section>
+              <q-item-label>{{ todo.content }}</q-item-label>
+            </q-item-section>
+            <q-item-section top side>
+              <div class="text-grey-8 q-gutter-xs">
+                <q-btn class="gt-xs" size="12px" color="red" flat dense round icon="close" />
+              </div>
+            </q-item-section>
+          </q-item>
+        </q-list>
+
       </div>
     </div>
   </q-page>
@@ -38,37 +73,32 @@
 <script lang="ts">
 import { Todo, Meta } from 'components/models';
 import ExampleComponent from 'components/ClassComponent.vue';
-import { Vue, Component } from 'vue-property-decorator';
+import { Vue, Component, Emit } from 'vue-property-decorator';
 
 @Component({
   components: { ExampleComponent },
 })
 export default class PageIndex extends Vue {
-  todos: Todo[] = [
-    {
-      id: 1,
-      content: 'ct1',
-    },
-    {
-      id: 2,
-      content: 'ct2',
-    },
-    {
-      id: 3,
-      content: 'ct3',
-    },
-    {
-      id: 4,
-      content: 'ct4',
-    },
-    {
-      id: 5,
-      content: 'ct5',
-    },
-  ];
+  newTodo = '';
+
+  todos: Todo[] = [];
+
+  done: Todo[] = [];
 
   meta: Meta = {
     totalCount: 1200,
   };
+
+  @Emit()
+  addTodo() {
+    this.todos.push({ id: Math.random(), content: this.newTodo });
+    this.newTodo = '';
+  }
+
+  @Emit()
+  moveToDone(id: number) {
+    this.done.push(this.todos.find((t) => t.id === id));
+    this.todos = this.todos.filter((t) => t.id !== id);
+  }
 }
 </script>
