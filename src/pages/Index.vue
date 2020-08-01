@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-expressions */
 <template>
   <q-page padding>
     <div class="row q-mb-lg">
@@ -59,7 +60,14 @@
             </q-item-section>
             <q-item-section top side>
               <div class="text-grey-8 q-gutter-xs">
-                <q-btn class="gt-xs" size="12px" color="red" flat dense round icon="close" />
+                <q-btn
+                  class="gt-xs"
+                  size="12px"
+                  color="red"
+                  flat dense round
+                  icon="close"
+                  @click.native="deleteTodo(todo.id)"
+                />
               </div>
             </q-item-section>
           </q-item>
@@ -91,7 +99,8 @@ export default class PageIndex extends Vue {
 
   @Emit()
   addTodo() {
-    this.todos.push({ id: Math.random(), content: this.newTodo });
+    const todo: Todo = { id: Math.random(), content: this.newTodo };
+    this.todos.push(todo);
     this.newTodo = '';
   }
 
@@ -99,6 +108,21 @@ export default class PageIndex extends Vue {
   moveToDone(id: number) {
     this.done.push(this.todos.find((t) => t.id === id));
     this.todos = this.todos.filter((t) => t.id !== id);
+  }
+
+  @Emit()
+  deleteTodo(id: number) {
+    this.$q.dialog({
+      title: 'Confirm',
+      message: 'Really delete?',
+      color: 'negative',
+      ok: 'Yes, I\'m sure',
+      cancel: true,
+      default: 'cancel',
+    }).onOk(() => {
+      this.done.splice(id, 1),
+      this.$q.notify('Deleted!');
+    });
   }
 }
 </script>
